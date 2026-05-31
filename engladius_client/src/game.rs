@@ -12,6 +12,7 @@ use sdl2::video::{DisplayMode, Window, WindowContext, WindowSurfaceRef};
 use sdl2::{EventPump, Sdl, VideoSubsystem, gfx};
 
 use crate::assets::Assets;
+use crate::gui::MainMenuGui;
 
 pub struct Game<'a> {
     pub sdl_context: Sdl,
@@ -23,6 +24,7 @@ pub struct Game<'a> {
     done: bool,
     delta: f32,
     pub assets_directory_path: PathBuf,
+    pub main_menu_gui: Option<MainMenuGui<'a>>
 }
 
 impl<'a> Game<'a> {
@@ -66,43 +68,42 @@ impl<'a> Game<'a> {
             done: false,
             delta: 0.0,
             assets_directory_path: assets_path,
+            main_menu_gui: None
         };
 
         Ok(game)
     }
 
-    pub fn draw(&mut self, assets: &Assets) -> Result<(), String> {
+
+
+    pub fn draw(&mut self, assets: &Assets, view_rect: &Rect, view_scale: i32) -> Result<(), String> {
 
         
         self.game_surf.fill_rect(None, Color::RGB(80, 150, 80))?;
         
 
         let title_text_surface = assets
-            .font_title
-            .render("Engladius_")
-            .blended(Color::RGB(255, 255, 255))
+            .font_normal
+            .render("* Engladius *")
+            .solid(Color::RGB(255, 255, 255))
             .map_err(|e| e.to_string())?;
 
         let title_text_surface_black: Surface<'_> = assets
-            .font_title
-            .render("Engladius_")
-            .blended(Color::RGB(0, 0, 0))
+            .font_normal
+            .render("* Engladius *")
+            .solid(Color::RGB(0, 0, 0))
             .map_err(|e| e.to_string())?;
 
-        title_text_surface_black.blit(None, &mut self.game_surf, Some(Rect::new(384 / 2 - title_text_surface_black.width() as i32 / 2 + 1, 15 - title_text_surface_black.height() as i32 / 2 + 1, 2, 2)))?;
+        title_text_surface_black.blit(None, &mut self.game_surf, Some(Rect::new(384 / 2 - title_text_surface_black.width() as i32 / 2 + 1, 15 - title_text_surface_black.height() as i32 / 2 + 2, 2, 2)))?;
         title_text_surface.blit(None, &mut self.game_surf, Some(Rect::new(384 / 2 - title_text_surface.width() as i32 / 2, 15 - title_text_surface.height() as i32 / 2, 2, 2)))?;
         
-        
-        // let title_text_surface = assets
-        //     .font1
-        //     .render("Hello world!")
-        //     .blended(Color::RGB(255, 255, 255))
-        //     .map_err(|e| e.to_string())?;
-
-        // // self.game_surf.fill_rect()
-
-        // title_text_surface.blit(None, &mut self.game_surf, Some(Rect::new(384 / 2 - text_surface.width() as i32 / 2, 216 / 2 - text_surface.height() as i32 / 2, 2, 2)))?;
-        
+    
+        match &self.main_menu_gui {
+            Some(main_menu) => {
+                main_menu.draw(&mut self.game_surf, &self.event_pump, view_rect, view_scale)?;
+            },
+            None => {}
+        }
 
         Ok(())
     }
@@ -131,19 +132,21 @@ impl<'a> Game<'a> {
             }
 
             
+            let window_size = self.window.size();
+
+            let window_center = (window_size.0 / 2, window_size.1 / 2);
+
+            let scale: i32 = (window_size.0 as i32 / 384).min((window_size.1 as i32 / 216));
+
+            let game_rect = Rect::new(window_center.0 as i32 - (384 * scale) / 2 , window_center.1 as i32 - (216 * scale) / 2, 384 * scale as u32, 216 * scale as u32);
 
 
-            self.draw(assets)?;
+            self.draw(assets, &game_rect, scale)?;
 
             let mut winsurf = self.window.surface(&self.event_pump)?;
 
-            let window_rect = winsurf.rect();
+            
 
-            let window_center = window_rect.center();
-
-            let scale: i32 = (window_rect.w / 384).min((window_rect.h / 216));
-
-            let game_rect = Rect::new(window_center.x - (384 * scale) / 2 , window_center.y - (216 * scale) / 2, 384 * scale as u32, 216 * scale as u32);
 
             self.game_surf.blit_scaled(None, &mut winsurf, Some(game_rect))?;
 
