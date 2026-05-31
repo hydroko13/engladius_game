@@ -3,3 +3,8 @@ name = "engladius_client"
 version = "0.1.0"
 edition = "2024"
 
+[target.'cfg(target_os = "windows")'.dependencies]
+sdl2 = { version = "0.38.0", features = ["static-link", "use-vcpkg", "image", "ttf", "gfx", "mixer"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+sdl2 = { version = "0.38.0", features = ["static-link", "use-pkgconfig", "image", "ttf", "gfx", "mixer"] }
