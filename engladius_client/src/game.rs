@@ -17,7 +17,7 @@ use crate::gui::MainMenuGui;
 pub enum GameState<'a> {
     LoadingGame,
     MainMenu(MainMenuGui<'a>),
-    InLobby
+    InGame
 }
 
 pub struct Game<'a> {
@@ -132,7 +132,6 @@ impl<'a> Game<'a> {
             },
             _ => {}
         }
-
         Ok(())
     }
 
