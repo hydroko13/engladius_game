@@ -174,7 +174,7 @@ impl<'a> Game<'a> {
             let mut winsurf = self.window.surface(&self.event_pump)?;
 
             
-            winsurf.fill_rect(None,Color::BLACK);
+            winsurf.fill_rect(None,Color::BLACK)?;
 
             self.game_surf.blit_scaled(None, &mut winsurf, Some(game_rect))?;
 
