@@ -63,10 +63,12 @@ impl<'a> Game<'a> {
             )
             .position(20, 20)
             .resizable()
+
             .build()
             .unwrap()
 
         };
+        window.set_minimum_size(384, 216);
         if start_fullscreen {
             window.set_fullscreen(sdl2::video::FullscreenType::Desktop)?;
         }
