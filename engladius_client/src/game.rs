@@ -14,6 +14,12 @@ use sdl2::{EventPump, Sdl, VideoSubsystem, gfx};
 use crate::assets::Assets;
 use crate::gui::MainMenuGui;
 
+pub enum GameState<'a> {
+    LoadingGame,
+    MainMenu(MainMenuGui<'a>),
+    InLobby
+}
+
 pub struct Game<'a> {
     pub sdl_context: Sdl,
     monitor_display_mode: DisplayMode,
@@ -24,7 +30,7 @@ pub struct Game<'a> {
     done: bool,
     delta: f32,
     pub assets_directory_path: PathBuf,
-    pub main_menu_gui: Option<MainMenuGui<'a>>,
+    pub game_state: GameState<'a>,
     pub game_version: String,
 }
 
@@ -88,7 +94,7 @@ impl<'a> Game<'a> {
             done: false,
             delta: 0.0,
             assets_directory_path: assets_path,
-            main_menu_gui: None
+            game_state: GameState::LoadingGame,
         };
 
         Ok(game)
@@ -120,11 +126,11 @@ impl<'a> Game<'a> {
         title_text_surface.blit(None, &mut self.game_surf, Some(Rect::new(384 / 2 - title_text_surface.width() as i32 / 2, 15 - title_text_surface.height() as i32 / 2, 2, 2)))?;
         
     
-        match &self.main_menu_gui {
-            Some(main_menu) => {
+        match &self.game_state {
+            GameState::MainMenu(main_menu) => {
                 main_menu.draw(&mut self.game_surf, &self.event_pump, view_rect, view_scale)?;
             },
-            None => {}
+            _ => {}
         }
 
         Ok(())
