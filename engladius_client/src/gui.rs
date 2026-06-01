@@ -66,32 +66,55 @@ impl<'a> Button<'a> {
 
         Ok(())
     }
+
+    pub fn is_hovered(&self, event_pump: &EventPump, view_rect: &Rect, view_scale: i32) -> bool {
+        let window_mouse_pos = event_pump.mouse_state();
+
+        let game_mouse_pos = ((window_mouse_pos.x() - view_rect.x) / view_scale, (window_mouse_pos.y() - view_rect.y) / view_scale);
+        
+        let mut hover_rect = self.rendered_text.rect();  
+
+        hover_rect.center_on(Point::new(self.x, self.y));      
+
+        hover_rect.contains_point(game_mouse_pos)
+    }
+
 }
 
-pub struct MainMenuGui<'a> {
-    play_button: Button<'a>,
-    config_button: Button<'a>
+pub enum GuiElement<'a> {
+    GuiButton(Button<'a>),
+    GuiLabel,
 }
 
-impl<'a> MainMenuGui<'a> {
-    pub fn new(assets: &Assets) -> Result<MainMenuGui<'a>, String> {
+pub struct Gui<'a> {
+    gui_elements: Vec<GuiElement<'a>>
+}
 
-        let play_button = Button::new(384 / 2 - 100, 216 / 2 + 60, String::from("Play"), assets)?;
-        let config_button = Button::new(384 / 2 - 100, 216 / 2 + 20, String::from("Config"), assets)?;
-
-        let main_menu = MainMenuGui {
-            play_button,
-            config_button
-        };
-
-        Ok(main_menu)
+impl<'a> Gui<'a> {
+    pub fn new() -> Gui<'a> {
+        Gui {
+            gui_elements: Vec::new()
+        }
     }
 
     pub fn draw(&self, game_surf: &mut Surface<'a>, event_pump: &EventPump, view_rect: &Rect, view_scale: i32) -> Result<(), String> {
 
-        self.play_button.draw(game_surf, event_pump, view_rect, view_scale)?;
-        self.config_button.draw(game_surf, event_pump, view_rect, view_scale)?;
+        for element in &self.gui_elements {
+            match element {
+                GuiElement::GuiButton(btn) => {
+                    btn.draw(game_surf, event_pump, view_rect, view_scale)?;
+                }       
+                _ => {} 
+            }
+            
+        }
+        
 
         Ok(())
     }
+
+    pub fn process_left_click(&mut self, x: i32, y: i32, view_rect: &Rect, view_scale: i32) {
+        
+    }
+
 }

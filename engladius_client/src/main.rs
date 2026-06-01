@@ -1,8 +1,11 @@
-use crate::{assets::Assets, gui::MainMenuGui};
+use crate::{assets::Assets, main_menu::MainMenuState};
+
 
 mod game;
 mod assets;
 mod gui;
+mod ingame;
+mod main_menu;
 
 fn main() -> Result<(), String> {
 
@@ -21,7 +24,7 @@ fn main() -> Result<(), String> {
 
     let mut assets_instance = Assets::load(&ttf_context, &image_context, game_instance.assets_directory_path.clone())?;
 
-    game_instance.game_state = game::GameState::MainMenu(MainMenuGui::new(&assets_instance)?);
+    game_instance.game_state = game::GameState::MainMenu(MainMenuState::new());
 
     game_instance.run(&assets_instance)?;
 

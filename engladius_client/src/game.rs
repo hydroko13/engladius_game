@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
+use sdl2::controller::Button::Paddle4;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -12,12 +13,15 @@ use sdl2::video::{DisplayMode, Window, WindowContext, WindowSurfaceRef};
 use sdl2::{EventPump, Sdl, VideoSubsystem, gfx};
 
 use crate::assets::Assets;
-use crate::gui::MainMenuGui;
+use crate::game;
+use crate::ingame::InGameState;
+use crate::main_menu::MainMenuState;
+
 
 pub enum GameState<'a> {
     LoadingGame,
-    MainMenu(MainMenuGui<'a>),
-    InGame
+    MainMenu(MainMenuState<'a>),
+    InGame{in_game_state: InGameState}
 }
 
 pub struct Game<'a> {
@@ -147,6 +151,15 @@ impl<'a> Game<'a> {
 
             last_time = Instant::now();
 
+            let window_size = self.window.size();
+
+            let window_center = (window_size.0 / 2, window_size.1 / 2);
+
+            let scale: i32 = (window_size.0 as i32 / 384).min((window_size.1 as i32 / 216));
+
+            let game_rect = Rect::new(window_center.0 as i32 - (384 * scale) / 2 , window_center.1 as i32 - (216 * scale) / 2, 384 * scale as u32, 216 * scale as u32);
+            
+
             for event in self.event_pump.poll_iter() {
                 match event {
                     Event::Quit { .. } => self.done = true,
@@ -156,19 +169,32 @@ impl<'a> Game<'a> {
                     } => {
                         self.done = true;
                     }
+                    Event::MouseButtonDown { mouse_btn, x, y, .. } => {
+                        match &mut self.game_state {
+                            GameState::MainMenu(main_menu_gui) => {
+                                //main_menu_gui.process_left_click(x, y, &game_rect, scale);
+                            }
+                            _ => {}
+                        }
+                    }
                     _ => {}
                 }
             }
 
             
-            let window_size = self.window.size();
 
-            let window_center = (window_size.0 / 2, window_size.1 / 2);
+            match &mut self.game_state {
+                GameState::InGame{in_game_state} => {
+                    in_game_state.update(self.delta);
+                }
 
-            let scale: i32 = (window_size.0 as i32 / 384).min((window_size.1 as i32 / 216));
+                GameState::MainMenu(main_menu_gui) => {
+                    
+                }
 
-            let game_rect = Rect::new(window_center.0 as i32 - (384 * scale) / 2 , window_center.1 as i32 - (216 * scale) / 2, 384 * scale as u32, 216 * scale as u32);
-            
+                _ => {}
+            }
+
 
 
             self.draw(assets, &game_rect, scale)?;
