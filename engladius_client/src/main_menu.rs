@@ -5,16 +5,19 @@ use crate::{assets::Assets, gui::Gui};
 pub struct MainMenuState<'a> {
     pub main_menu_gui: Gui<'a>,
 
+
 }
 
 impl<'a> MainMenuState<'a> {
-    pub fn new() -> MainMenuState<'a> {
+    pub fn new(assets: &Assets) -> Result<MainMenuState<'a>, String> {
 
+        let mut gui = Gui::new();
 
+        gui.add_button(100, 100, "play".to_string(), assets);
 
-        MainMenuState {
-            main_menu_gui: Gui::new()
-        }
+        Ok(MainMenuState {
+            main_menu_gui: gui
+        })
     }
 
     pub fn draw(&self, game_surf: &mut Surface<'a>, event_pump: &EventPump, view_rect: &Rect, view_scale: i32) -> Result<(), String>{

@@ -8,8 +8,6 @@ pub struct Button<'a> {
     text: String,
     rendered_text: Surface<'a>,
     rendered_text_shadow: Surface<'a>,
-    rendered_text_hover: Surface<'a>,
-    rendered_text_shadow_hover: Surface<'a>,
 }
 
 impl<'a> Button<'a> {
@@ -19,11 +17,6 @@ impl<'a> Button<'a> {
 
         let rendered_text_shadow = assets.font_normal.render(text.as_str()).solid(Color::RGB(0, 0, 0)).map_err(|e| e.to_string())?;
 
-        let rendered_text_hover = assets.font_normal.render(&("* ".to_owned() + text.as_str())).solid(Color::RGB(255, 255, 0)).map_err(|e| e.to_string())?;
-
-        let rendered_text_shadow_hover = assets.font_normal.render(&("* ".to_owned() + text.as_str())).solid(Color::RGB(0, 0, 0)).map_err(|e| e.to_string())?;
-
-        
 
 
 
@@ -34,8 +27,7 @@ impl<'a> Button<'a> {
             text,
             rendered_text: rendered_text_surf,
             rendered_text_shadow: rendered_text_shadow,
-            rendered_text_shadow_hover,
-            rendered_text_hover
+
 
         };
 
@@ -54,8 +46,8 @@ impl<'a> Button<'a> {
         hover_rect.center_on(Point::new(self.x, self.y));      
 
         if hover_rect.contains_point(game_mouse_pos) {
-            self.rendered_text_shadow_hover.blit(None, &mut game_surf, Some(Rect::new(self.x - self.rendered_text_hover.width() as i32 / 2 + 1 + 6, self.y - self.rendered_text_hover.height() as i32 / 2 + 2, 0, 0)))?;
-            self.rendered_text_hover.blit(None, &mut game_surf, Some(Rect::new(self.x - self.rendered_text_hover.width() as i32 / 2 - 1 + 6, self.y - self.rendered_text_hover.height() as i32 / 2 - 1, 0, 0)))?;  
+            self.rendered_text_shadow.blit(None, &mut game_surf, Some(Rect::new(self.x - self.rendered_text.width() as i32 / 2 + 1 , self.y - self.rendered_text.height() as i32 / 2 + 2, 0, 0)))?;
+            self.rendered_text.blit(None, &mut game_surf, Some(Rect::new(self.x - self.rendered_text.width() as i32 / 2 - 1 , self.y - self.rendered_text.height() as i32 / 2 - 1, 0, 0)))?;  
         } else {
             self.rendered_text_shadow.blit(None, &mut game_surf, Some(Rect::new(self.x - self.rendered_text.width() as i32 / 2 + 1, self.y - self.rendered_text.height() as i32 / 2 + 2, 0, 0)))?;
             self.rendered_text.blit(None, &mut game_surf, Some(Rect::new(self.x - self.rendered_text.width() as i32 / 2, self.y - self.rendered_text.height() as i32 / 2, 0, 0)))?;  
@@ -109,6 +101,14 @@ impl<'a> Gui<'a> {
             
         }
         
+
+        Ok(())
+    }
+
+    pub fn add_button(&mut self, x: i32, y: i32, text: String, assets: &Assets, ) -> Result<(), String> {
+        let btn = Button::new(x, y, text, assets)?;
+
+        self.gui_elements.push(GuiElement::GuiButton(btn));
 
         Ok(())
     }
