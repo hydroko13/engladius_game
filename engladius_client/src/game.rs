@@ -32,21 +32,39 @@ impl<'a> Game<'a> {
     pub fn new(game_version: String) -> Result<Game<'a>, String> {
         let sdl_context = sdl2::init()?;
 
+        let start_fullscreen = false;
+
         let video_subsystem = sdl_context.video()?;
 
         let monitor_display_mode = video_subsystem.desktop_display_mode(0).unwrap();
-
-        let mut window = video_subsystem
+        let mut window = if start_fullscreen {
+            video_subsystem
             .window(
-                "Hello world",
+                "Engladius",
                 monitor_display_mode.w as u32,
                 monitor_display_mode.h as u32,
             )
             .position(20, 20)
             .build()
-            .unwrap();
+            .unwrap()
 
-        window.set_fullscreen(sdl2::video::FullscreenType::Desktop)?;
+        } else {
+            video_subsystem
+            .window(
+                "Engladius",
+                960,
+                600,
+            )
+            .position(20, 20)
+            .resizable()
+            .build()
+            .unwrap()
+
+        };
+        if start_fullscreen {
+            window.set_fullscreen(sdl2::video::FullscreenType::Desktop)?;
+        }
+        
         let event_pump = sdl_context.event_pump().unwrap();
 
         let game_surf = Surface::new(384, 216, sdl2::pixels::PixelFormatEnum::RGB24)?;
@@ -143,6 +161,7 @@ impl<'a> Game<'a> {
             let scale: i32 = (window_size.0 as i32 / 384).min((window_size.1 as i32 / 216));
 
             let game_rect = Rect::new(window_center.0 as i32 - (384 * scale) / 2 , window_center.1 as i32 - (216 * scale) / 2, 384 * scale as u32, 216 * scale as u32);
+            
 
 
             self.draw(assets, &game_rect, scale)?;
@@ -150,7 +169,7 @@ impl<'a> Game<'a> {
             let mut winsurf = self.window.surface(&self.event_pump)?;
 
             
-
+            winsurf.fill_rect(None,Color::BLACK);
 
             self.game_surf.blit_scaled(None, &mut winsurf, Some(game_rect))?;
 
