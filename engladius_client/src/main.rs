@@ -7,6 +7,7 @@ mod gui;
 mod ingame;
 mod main_menu;
 
+
 fn main() -> Result<(), String> {
 
     let engladius_client_version = "0.1-beta".to_string();

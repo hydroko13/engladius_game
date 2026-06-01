@@ -15,13 +15,14 @@ use sdl2::{EventPump, Sdl, VideoSubsystem, gfx};
 use crate::assets::Assets;
 use crate::game;
 use crate::ingame::InGameState;
+use crate::main_menu::MainMenuEvent::PressedPlay;
 use crate::main_menu::MainMenuState;
 
 
 pub enum GameState<'a> {
     LoadingGame,
     MainMenu(MainMenuState<'a>),
-    InGame{in_game_state: InGameState}
+    InGame(InGameState)
 }
 
 pub struct Game<'a> {
@@ -116,26 +117,14 @@ impl<'a> Game<'a> {
         let game_title = &("Engladius ".to_owned() + &self.game_version);
         
 
-        let title_text_surface = assets
-            .font_normal
-            .render(game_title)
-            .solid(Color::RGB(255, 255, 255))
-            .map_err(|e| e.to_string())?;
-
-        let title_text_surface_black: Surface<'_> = assets
-            .font_normal
-            .render(game_title)
-            .solid(Color::RGB(0, 0, 0))
-            .map_err(|e| e.to_string())?;
-
-        title_text_surface_black.blit(None, &mut self.game_surf, Some(Rect::new(384 / 2 - title_text_surface_black.width() as i32 / 2 + 1, 15 - title_text_surface_black.height() as i32 / 2 + 2, 2, 2)))?;
-        title_text_surface.blit(None, &mut self.game_surf, Some(Rect::new(384 / 2 - title_text_surface.width() as i32 / 2, 15 - title_text_surface.height() as i32 / 2, 2, 2)))?;
-        
     
         match &self.game_state {
             GameState::MainMenu(main_menu) => {
                 main_menu.draw(&mut self.game_surf, &self.event_pump, view_rect, view_scale)?;
             },
+            GameState::InGame(in_game) => {
+                in_game.draw(assets, &mut self.game_surf, &self.event_pump, view_rect, view_scale)?;
+            }
             _ => {}
         }
         Ok(())
@@ -171,8 +160,11 @@ impl<'a> Game<'a> {
                     }
                     Event::MouseButtonDown { mouse_btn, x, y, .. } => {
                         match &mut self.game_state {
-                            GameState::MainMenu(main_menu_gui) => {
-                                //main_menu_gui.process_left_click(x, y, &game_rect, scale);
+                            GameState::MainMenu(main_menu) => {
+                                main_menu.process_left_click(x, y, &game_rect, scale);
+                            },
+                            GameState::InGame(in_game_state) => {
+                                in_game_state.process_left_click(x, y, &game_rect, scale);
                             }
                             _ => {}
                         }
@@ -184,12 +176,18 @@ impl<'a> Game<'a> {
             
 
             match &mut self.game_state {
-                GameState::InGame{in_game_state} => {
-                    in_game_state.update(self.delta);
+                GameState::InGame(in_game_state) => {
+                    in_game_state.update(self.delta, &self.event_pump);
                 }
 
-                GameState::MainMenu(main_menu_gui) => {
-                    
+                GameState::MainMenu(main_menu) => {
+                    match main_menu.update(self.delta) {
+                        PressedPlay => {
+                            let in_game_state = InGameState::new();
+                            self.game_state = GameState::InGame(in_game_state);
+                        },
+                        _ => {}
+                    }
                 }
 
                 _ => {}
@@ -207,6 +205,8 @@ impl<'a> Game<'a> {
             self.game_surf.blit_scaled(None, &mut winsurf, Some(game_rect))?;
 
             winsurf.update_window()?;
+
+            
 
             
 
