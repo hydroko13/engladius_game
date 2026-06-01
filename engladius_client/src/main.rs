@@ -6,8 +6,10 @@ mod gui;
 
 fn main() -> Result<(), String> {
 
+    let engladius_client_version = "0.1-beta".to_string();
 
-    let mut game_instance = game::Game::new()?;
+
+    let mut game_instance = game::Game::new(engladius_client_version.clone())?;
 
     let ttf_context = sdl2::ttf::init()?;
 

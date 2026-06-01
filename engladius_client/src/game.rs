@@ -24,11 +24,12 @@ pub struct Game<'a> {
     done: bool,
     delta: f32,
     pub assets_directory_path: PathBuf,
-    pub main_menu_gui: Option<MainMenuGui<'a>>
+    pub main_menu_gui: Option<MainMenuGui<'a>>,
+    pub game_version: String,
 }
 
 impl<'a> Game<'a> {
-    pub fn new() -> Result<Game<'a>, String> {
+    pub fn new(game_version: String) -> Result<Game<'a>, String> {
         let sdl_context = sdl2::init()?;
 
         let video_subsystem = sdl_context.video()?;
@@ -61,6 +62,7 @@ impl<'a> Game<'a> {
         let game = Game {
             sdl_context: sdl_context,
             window: window,
+            game_version,
             video_subsystem: video_subsystem,
             monitor_display_mode: monitor_display_mode,
             game_surf: game_surf,
@@ -80,17 +82,19 @@ impl<'a> Game<'a> {
 
         
         self.game_surf.fill_rect(None, Color::RGB(80, 150, 80))?;
+
+        let game_title = &("Engladius ".to_owned() + &self.game_version);
         
 
         let title_text_surface = assets
             .font_normal
-            .render("* Engladius *")
+            .render(game_title)
             .solid(Color::RGB(255, 255, 255))
             .map_err(|e| e.to_string())?;
 
         let title_text_surface_black: Surface<'_> = assets
             .font_normal
-            .render("* Engladius *")
+            .render(game_title)
             .solid(Color::RGB(0, 0, 0))
             .map_err(|e| e.to_string())?;
 

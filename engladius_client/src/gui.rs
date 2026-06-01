@@ -67,7 +67,7 @@ pub struct MainMenuGui<'a> {
 impl<'a> MainMenuGui<'a> {
     pub fn new(assets: &Assets) -> Result<MainMenuGui<'a>, String> {
 
-        let play_button = Button::new(384 / 2, 216 / 2, String::from("Play"), assets)?;
+        let play_button = Button::new(384 / 2, 216 / 2 + 60, String::from("Play"), assets)?;
 
         let main_menu = MainMenuGui {
             play_button
