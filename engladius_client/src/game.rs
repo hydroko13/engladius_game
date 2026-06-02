@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use sdl2::controller::Button::Paddle4;
 use sdl2::event::Event;
@@ -8,6 +8,7 @@ use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::surface::Surface;
+use sdl2::sys::SDL_Renderer;
 use sdl2::ttf::{Font, Sdl2TtfContext, init};
 use sdl2::video::{DisplayMode, Window, WindowContext, WindowSurfaceRef};
 use sdl2::{EventPump, Sdl, VideoSubsystem, gfx};
@@ -36,8 +37,9 @@ pub struct Game<'a> {
     delta: f32,
     pub assets_directory_path: PathBuf,
     pub game_state: GameState<'a>,
-    pub game_version: String,
+    pub game_version: String
 }
+
 
 impl<'a> Game<'a> {
     pub fn new(game_version: String) -> Result<Game<'a>, String> {
@@ -88,7 +90,7 @@ impl<'a> Game<'a> {
 
         let assets_path = cwd.join("assets/");
 
-        
+
 
         let game = Game {
             sdl_context: sdl_context,
@@ -101,7 +103,7 @@ impl<'a> Game<'a> {
             done: false,
             delta: 0.0,
             assets_directory_path: assets_path,
-            game_state: GameState::LoadingGame,
+            game_state: GameState::LoadingGame
         };
 
         Ok(game)
@@ -131,7 +133,9 @@ impl<'a> Game<'a> {
     }
 
     pub fn run(&mut self, assets: &Assets) -> Result<(), String> {
-        let mut last_time = Instant::now();
+        let mut last_time: Instant = Instant::now();
+        let target_fps: f64 = 100.0;
+        let target_frame_dur = (1.0 / target_fps);
 
         while !self.done {
             let now: Instant = Instant::now();
@@ -206,7 +210,19 @@ impl<'a> Game<'a> {
 
             winsurf.update_window()?;
 
-            
+            println!("{}", 1.0/self.delta);
+
+            let now: Instant = Instant::now();
+
+            let mut remaining_time = target_frame_dur - now.duration_since(last_time).as_secs_f64();
+
+            if remaining_time > 0.0 {
+                std::thread::sleep(Duration::from_secs_f64(remaining_time));
+            }
+
+           
+
+        
 
             
 
